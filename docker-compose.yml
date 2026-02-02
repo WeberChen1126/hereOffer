@@ -110,7 +110,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: recruit_flow_worker
-    command: python worker/run_worker.py
+    working_dir: /app
+    command: python /app/worker/run_worker.py
     volumes:
       - .:/app
     environment:

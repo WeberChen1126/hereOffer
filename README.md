@@ -313,19 +313,23 @@ MINIO_SECRET_KEY=minioadmin
 
 ## 📊 性能指标
 
+> **注意**: 以下性能指标为估算值，实际性能可能因环境、网络、负载等因素有所不同。  
+> 运行性能测试获取真实值：`python tests/test_performance_metrics.py`  
+> 详细说明请参考 [性能测试文档](tests/PERFORMANCE_TESTING.md)
+
 ### 处理能力
 
-- 简历解析：60 秒/份（LLM）
-- 简历评分：30 秒/份（LLM）
-- 题目生成：90 秒/份（LLM）
-- 并发处理：100+ 简历/小时（单 Worker）
+- 简历解析：14.57  秒/份（标准简历）
+- 简历评分：4.20 秒/份
+- 题目生成：14.07 秒/份
+- 并发处理：取决于 Worker 数量和 LLM API 限流
 
 ### 系统性能
 
-- API 响应：< 200ms（P95）
-- 数据库查询：< 50ms（P95）
-- WebSocket 延迟：< 100ms
-- 文件上传：10MB/秒+
+- API 响应：通常 < 4ms（不含 LLM 调用）
+- 数据库查询：通常 < 10ms
+- WebSocket 延迟：通常 < 1ms
+- 文件上传：4.46 MB/s
 
 ---
 
