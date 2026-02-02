@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hereOffer - 实时对话演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .status {
+            padding: 10px 20px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .status.connected {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #fafafa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message .bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+        }
+
+        .message.user .bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message.assistant .bubble {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+        }
+
+        .message.system .bubble {
+            background: #fff3cd;
+            color: #856404;
+            font-style: italic;
+            font-size: 13px;
+        }
+
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-radius: 0 0 20px 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #messageInput:focus {
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .controls input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 10px 16px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 18px;
+            width: fit-content;
+        }
+
+        .typing-indicator.show {
+            display: block;
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #999;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎙️ hereOffer 实时对话</h1>
+            <p>支持文本和语音实时交互</p>
+        </div>
+
+        <div class="status" id="status">
+            ⏸️ 未连接 - 请先登录并创建会话
+        </div>
+
+        <div class="messages" id="messages">
+            <div class="message system">
+                <div class="bubble">
+                    欢迎使用 hereOffer 实时对话系统！请先登录并创建会话。
+                </div>
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+        <div class="input-area">
+            <div class="controls">
+                <input type="text" id="sessionId" placeholder="会话ID (登录后自动填充)">
+                <input type="text" id="token" placeholder="JWT Token (登录后自动填充)">
+                <button class="btn btn-secondary" onclick="connect()">连接</button>
+                <button class="btn btn-secondary" onclick="disconnect()">断开</button>
+            </div>
+            <div class="input-group">
+                <input type="text" id="messageInput" placeholder="输入消息..." disabled>
+                <button class="btn btn-primary" onclick="sendMessage()" id="sendBtn" disabled>发送</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let isConnected = false;
+
+        // 添加消息到界面
+        function addMessage(role, content, isSystem = false) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isSystem ? 'system' : role}`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.textContent = content;
+            
+            messageDiv.appendChild(bubble);
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // 显示/隐藏输入指示器
+        function showTypingIndicator(show) {
+            const indicator = document.getElementById('typingIndicator');
+            if (show) {
+                indicator.classList.add('show');
+            } else {
+                indicator.classList.remove('show');
+            }
+        }
+
+        // 更新状态
+        function updateStatus(text, connected = false) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = text;
+            if (connected) {
+                statusDiv.classList.add('connected');
+            } else {
+                statusDiv.classList.remove('connected');
+            }
+        }
+
+        // 连接 WebSocket
+        function connect() {
+            const sessionId = document.getElementById('sessionId').value;
+            const token = document.getElementById('token').value;
+
+            if (!sessionId || !token) {
+                alert('请填写会话ID和Token！');
+                return;
+            }
+
+            const wsUrl = `ws://localhost:8000/ws/chat/${sessionId}?token=${token}`;
+            
+            updateStatus('🔄 正在连接...');
+            
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                isConnected = true;
+                updateStatus('✅ 已连接', true);
+                document.getElementById('messageInput').disabled = false;
+                document.getElementById('sendBtn').disabled = false;
+                addMessage('system', '连接成功！您可以开始提问了。', true);
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                
+                if (data.type === 'system') {
+                    addMessage('system', data.message, true);
+                } else if (data.type === 'typing') {
+                    showTypingIndicator(true);
+                } else if (data.type === 'text') {
+                    showTypingIndicator(false);
+                    addMessage('assistant', data.content);
+                } else if (data.type === 'voice') {
+                    showTypingIndicator(false);
+                    addMessage('assistant', `🎤 ${data.text}`);
+                    if (data.recognized_text) {
+                        addMessage('system', `识别文本: ${data.recognized_text}`, true);
+                    }
+                } else if (data.type === 'error') {
+                    showTypingIndicator(false);
+                    addMessage('system', `❌ ${data.message}`, true);
+                } else if (data.type === 'pong') {
+                    // 心跳响应
+                }
+            };
+
+            ws.onclose = () => {
+                isConnected = false;
+                updateStatus('❌ 已断开');
+                document.getElementById('messageInput').disabled = true;
+                document.getElementById('sendBtn').disabled = true;
+                addMessage('system', '连接已断开。', true);
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                updateStatus('❌ 连接错误');
+                addMessage('system', '连接出错，请检查网络或Token。', true);
+            };
+        }
+
+        // 断开连接
+        function disconnect() {
+            if (ws) {
+                ws.close();
+            }
+        }
+
+        // 发送消息
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+
+            if (!message) {
+                return;
+            }
+
+            if (!isConnected) {
+                alert('请先连接到服务器！');
+                return;
+            }
+
+            // 发送到 WebSocket
+            ws.send(JSON.stringify({
+                type: 'text',
+                content: message
+            }));
+
+            // 显示在界面
+            addMessage('user', message);
+            
+            // 清空输入框
+            input.value = '';
+        }
+
+        // 回车发送
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // 定时心跳
+        setInterval(() => {
+            if (isConnected && ws) {
+                ws.send(JSON.stringify({ type: 'ping' }));
+            }
+        }, 30000);
+
+        // 示例：自动填充（测试用）
+        // 实际应该从登录接口获取
+        // document.getElementById('sessionId').value = '1';
+        // document.getElementById('token').value = 'your_jwt_token_here';
+    </script>
+</body>
+</html>
