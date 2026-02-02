@@ -61,21 +61,25 @@ hereOffer 是一个现代化的智能招聘系统，利用大语言模型（LLM�
 ## 📸 界面展示
 
 ### 职位列表
+
 浏览所有可投递的职位。
 
 ![职位列表](docs/images/job-list.png)
 
 ### 投递详情
+
 查看简历评估结果、多维度评分详情和智能推荐建议。
 
 ![投递详情](docs/images/application-details.png)
 
 ### 面试题包
+
 查看根据简历自动生成的个性化面试题目，包含参考答案和评分要点。
 
 ![面试题包](docs/images/interview-question-bank.png)
 
 ### AI 客服
+
 实时对话咨询，支持文本交互，基于 RAG 技术提供智能回答。
 
 ![AI客服](docs/images/ai-customer-service.png)
@@ -127,21 +131,25 @@ curl http://localhost:8000/healthz
 ### 技术栈
 
 **后端框架**
+
 - FastAPI - 高性能 Web 框架
 - SQLAlchemy - ORM 框架
 - Alembic - 数据库迁移
 
 **数据存储**
+
 - MySQL 8.0 - 关系型数据库
 - Redis 7.0 - 缓存和任务队列
 - MinIO - 对象存储（S3 兼容）
 
 **AI/LLM**
+
 - 阿里云 DashScope - LLM API
 - qwen2.5-7b - 简历解析和评分
 - qwen2.5-32b - 面试题生成
 
 **异步任务**
+
 - RQ (Redis Queue) - 任务队列
 - Redis - 任务存储
 
@@ -204,7 +212,6 @@ curl http://localhost:8000/healthz
 
 - [API 参考](docs/frontend/API_REFERENCE.md) - API 接口参考
 - [WebSocket 指南](docs/frontend/WEBSOCKET.md) - 实时通信指南
-
 
 ---
 
@@ -362,8 +369,6 @@ MINIO_SECRET_KEY=minioadmin
 - ✅ 实时对话
 - ✅ 完整测试覆盖
 
-
-
 ---
 
 ## 📄 许可证
@@ -391,6 +396,5 @@ MINIO_SECRET_KEY=minioadmin
 <div align="center">
 
 **⭐ 如果这个项目对你有帮助，请给我们一个 Star！**
-
 
 </div>
